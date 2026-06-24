@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <form class="month-filter" method="get" action="{{ url_for('dashboard') }}">
+    <label for="month-select">Month:</label>
+    <select name="year" id="year-select" onchange="this.form.submit()">
+      {% set years = months | map(attribute=0) | unique | list %}
+      {% if selected_year not in years %}{% set years = [selected_year] + years %}{% endif %}
+      {% for y in years | sort(reverse=True) %}
+        <option value="{{ y }}" {{ 'selected' if y == selected_year }}>{{ y }}</option>
+      {% endfor %}
+    </select>
+    <select name="month" id="month-select" onchange="this.form.submit()">
+      {% for m in range(1, 13) %}
+        <option value="{{ m }}" {{ 'selected' if m == selected_month }}>
+          {{ '%02d' % m }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<h2 class="section-title">{{ month_name }}</h2>
+
+<div class="summary-cards">
+  <div class="card card-income">
+    <div class="card-label">Total Income</div>
+    <div class="card-value income">₹{{ "%.2f" % summary.total_income }}</div>
+  </div>
+  <div class="card card-expense">
+    <div class="card-label">Total Expenses</div>
+    <div class="card-value expense">₹{{ "%.2f" % summary.total_expenses }}</div>
+  </div>
+  <div class="card card-net">
+    <div class="card-label">Net Balance</div>
+    <div class="card-value {{ 'income' if summary.net_balance >= 0 else 'expense' }}">
+      ₹{{ "%.2f" % summary.net_balance }}
+    </div>
+  </div>
+</div>
+
+{% if summary.by_category %}
+<section class="section">
+  <h2>Expenses by Category</h2>
+  <div class="category-breakdown">
+    {% for item in summary.by_category %}
+    <div class="cat-bar-row">
+      <span class="cat-dot" style="background:{{ item.color }}"></span>
+      <span class="cat-name">{{ item.name }}</span>
+      <div class="cat-bar-track">
+        <div class="cat-bar-fill" style="width:{{ (item.amount / summary.total_expenses * 100) | round(1) }}%; background:{{ item.color }}"></div>
+      </div>
+      <span class="cat-amount expense">₹{{ "%.2f" % item.amount }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="section-header">
+    <h2>Recent Transactions</h2>
+    <a href="{{ url_for('transactions', year=selected_year, month=selected_month) }}" class="link-muted">View all →</a>
+  </div>
+
+  {% if recent %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th>Type</th>
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in recent %}
+        <tr>
+          <td class="text-muted">{{ tx.date }}</td>
+          <td>{{ tx.description }}</td>
+          <td>
+            <span class="cat-badge" style="background:{{ tx.category_color }}20; color:{{ tx.category_color }}; border:1px solid {{ tx.category_color }}40">
+              {{ tx.category_name }}
+            </span>
+          </td>
+          <td>
+            <span class="type-badge type-{{ tx.type }}">{{ tx.type }}</span>
+          </td>
+          <td class="text-right {{ tx.type }}">
+            {{ '+' if tx.type == 'income' else '-' }}₹{{ "%.2f" % tx.amount }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>No transactions for {{ month_name }}.</p>
+    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">Add your first transaction</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

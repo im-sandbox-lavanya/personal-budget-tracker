@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Categories – Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Categories</h1>
+</div>
+
+<div class="categories-layout">
+
+  <!-- Add Category Form -->
+  <div class="form-container form-container-sm">
+    <h2>Add Category</h2>
+    <form method="post" action="{{ url_for('categories') }}" novalidate>
+      <div class="form-group">
+        <label for="cat-name" class="form-label">Name <span class="required">*</span></label>
+        <input type="text" id="cat-name" name="name" maxlength="50"
+          class="form-input {{ 'is-error' if errors.name }}"
+          value="{{ form.get('name', '') }}" placeholder="e.g. Groceries" required />
+        {% if errors.name %}<div class="error-msg">{{ errors.name }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="cat-color" class="form-label">Color</label>
+        <input type="color" id="cat-color" name="color"
+          class="form-input color-picker"
+          value="{{ form.get('color', '#6b7280') }}" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Category</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Existing Categories -->
+  <div class="categories-list-section">
+    <h2>Existing Categories ({{ categories | length }})</h2>
+    {% if categories %}
+    <div class="categories-grid">
+      {% for cat in categories %}
+      <div class="cat-card">
+        <div class="cat-card-left">
+          <span class="cat-swatch" style="background:{{ cat.color }}"></span>
+          <span class="cat-card-name">{{ cat.name }}</span>
+        </div>
+        <div class="cat-card-right">
+          <span class="cat-usage text-muted">
+            {{ usage.get(cat.id, 0) }} tx
+          </span>
+          <form method="post" action="{{ url_for('delete_category', category_id=cat.id) }}"
+                onsubmit="return confirm('Delete category \'{{ cat.name }}\'?')">
+            <button type="submit" class="btn-delete" title="Delete"
+              {{ 'disabled' if usage.get(cat.id, 0) > 0 }}>✕</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>No categories yet. Add one using the form.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

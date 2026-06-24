@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Add Transaction – Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Add Transaction</h1>
+  <a href="{{ url_for('transactions') }}" class="btn btn-ghost">← Back</a>
+</div>
+
+<div class="form-container">
+  <form method="post" action="{{ url_for('add_transaction') }}" novalidate>
+
+    <div class="form-group">
+      <label class="form-label">Type <span class="required">*</span></label>
+      <div class="type-toggle">
+        <label class="toggle-option">
+          <input type="radio" name="type" value="expense"
+            {{ 'checked' if form.get('type', 'expense') == 'expense' }}>
+          <span class="toggle-btn expense">📤 Expense</span>
+        </label>
+        <label class="toggle-option">
+          <input type="radio" name="type" value="income"
+            {{ 'checked' if form.get('type') == 'income' }}>
+          <span class="toggle-btn income">📥 Income</span>
+        </label>
+      </div>
+      {% if errors.type %}<div class="error-msg">{{ errors.type }}</div>{% endif %}
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="amount" class="form-label">Amount (₹) <span class="required">*</span></label>
+        <input type="number" id="amount" name="amount" step="0.01" min="0.01"
+          class="form-input {{ 'is-error' if errors.amount }}"
+          value="{{ form.get('amount', '') }}" placeholder="0.00" required />
+        {% if errors.amount %}<div class="error-msg">{{ errors.amount }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="date" class="form-label">Date <span class="required">*</span></label>
+        <input type="date" id="date" name="date"
+          class="form-input {{ 'is-error' if errors.date }}"
+          value="{{ form.get('date', '') }}" required />
+        {% if errors.date %}<div class="error-msg">{{ errors.date }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description" class="form-label">Description <span class="required">*</span></label>
+      <input type="text" id="description" name="description" maxlength="200"
+        class="form-input {{ 'is-error' if errors.description }}"
+        value="{{ form.get('description', '') }}" placeholder="e.g. Monthly rent" required />
+      {% if errors.description %}<div class="error-msg">{{ errors.description }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label for="category_id" class="form-label">Category <span class="required">*</span></label>
+      <select id="category_id" name="category_id"
+        class="form-input {{ 'is-error' if errors.category_id }}" required>
+        <option value="">— Select a category —</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" {{ 'selected' if form.get('category_id') == cat.id }}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+      {% if errors.category_id %}<div class="error-msg">{{ errors.category_id }}</div>{% endif %}
+    </div>
+
+    {% if not categories %}
+    <div class="alert alert-warning">
+      No categories yet.
+      <a href="{{ url_for('categories') }}">Create a category first</a>.
+    </div>
+    {% endif %}
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" {{ 'disabled' if not categories }}>
+        Save Transaction
+      </button>
+      <a href="{{ url_for('transactions') }}" class="btn btn-ghost">Cancel</a>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

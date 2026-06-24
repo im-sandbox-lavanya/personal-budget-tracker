@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Transactions – Budget Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Transactions</h1>
+  <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">+ Add Transaction</a>
+</div>
+
+<form class="filter-bar" method="get" action="{{ url_for('transactions') }}">
+  <label>Month:</label>
+  <select name="year" onchange="this.form.submit()">
+    <option value="">All years</option>
+    {% for y, m in months %}
+      {% if loop.changed(y) %}
+        <option value="{{ y }}" {{ 'selected' if y == selected_year }}>{{ y }}</option>
+      {% endif %}
+    {% endfor %}
+  </select>
+  <select name="month" onchange="this.form.submit()">
+    <option value="">All months</option>
+    {% for m in range(1, 13) %}
+      <option value="{{ m }}" {{ 'selected' if m == selected_month }}>{{ '%02d' % m }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Type:</label>
+  <select name="type" onchange="this.form.submit()">
+    <option value="">All</option>
+    <option value="income" {{ 'selected' if selected_type == 'income' }}>Income</option>
+    <option value="expense" {{ 'selected' if selected_type == 'expense' }}>Expense</option>
+  </select>
+  <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+  <a href="{{ url_for('transactions') }}" class="btn btn-ghost btn-sm">Clear</a>
+</form>
+
+{% if transactions %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Category</th>
+        <th>Type</th>
+        <th class="text-right">Amount</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transactions %}
+      <tr>
+        <td class="text-muted">{{ tx.date }}</td>
+        <td>{{ tx.description }}</td>
+        <td>
+          <span class="cat-badge" style="background:{{ tx.category_color }}20; color:{{ tx.category_color }}; border:1px solid {{ tx.category_color }}40">
+            {{ tx.category_name }}
+          </span>
+        </td>
+        <td>
+          <span class="type-badge type-{{ tx.type }}">{{ tx.type }}</span>
+        </td>
+        <td class="text-right {{ tx.type }}">
+          {{ '+' if tx.type == 'income' else '-' }}₹{{ "%.2f" % tx.amount }}
+        </td>
+        <td class="text-right">
+          <form method="post" action="{{ url_for('delete_transaction', transaction_id=tx.id) }}"
+                onsubmit="return confirm('Delete this transaction?')">
+            <button type="submit" class="btn-delete" title="Delete">✕</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="table-count text-muted">{{ transactions | length }} transaction{{ 's' if transactions | length != 1 }}</p>
+{% else %}
+<div class="empty-state">
+  <p>No transactions found.</p>
+  <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">Add your first transaction</a>
+</div>
+{% endif %}
+{% endblock %}

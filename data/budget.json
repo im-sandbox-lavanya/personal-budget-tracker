@@ -1,0 +1,50 @@
+{
+  "categories": [
+    {
+      "id": "8d028701-5ef7-4e69-bda9-5c05ad53d92d",
+      "name": "Salary",
+      "color": "#22c55e"
+    },
+    {
+      "id": "84dedea1-4097-41d0-97b5-3a4c0082a5c2",
+      "name": "Food",
+      "color": "#f97316"
+    },
+    {
+      "id": "392446d4-fde4-4ef7-a022-4c343ae3b4b1",
+      "name": "Transport",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "97d5811b-9f2f-4f80-9de1-6c36fec968c5",
+      "name": "Housing",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "f39d9e63-4c37-4e87-9027-106b475aa54a",
+      "name": "Healthcare",
+      "color": "#ec4899"
+    },
+    {
+      "id": "e11b4356-49a0-47b6-8a06-309dc701c342",
+      "name": "Entertainment",
+      "color": "#eab308"
+    },
+    {
+      "id": "30ed0092-6467-408f-9690-e8c9e61041c5",
+      "name": "Other",
+      "color": "#6b7280"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "af9fac31-110e-4d95-bb9a-2ff5e3fe4db5",
+      "type": "expense",
+      "amount": 5000.0,
+      "date": "2026-06-24",
+      "description": "Food",
+      "category_id": "84dedea1-4097-41d0-97b5-3a4c0082a5c2",
+      "created_at": "2026-06-24T03:22:30.164627"
+    }
+  ]
+}
