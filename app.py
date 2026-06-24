@@ -134,7 +134,8 @@ def export_transactions():
     type_param = request.args.get("type", "")
 
     try:
-        year = int(year_param) if year_param else None
+        year_int = int(year_param) if year_param else None
+        year = year_int if year_int is not None and 1900 <= year_int <= 2100 else None
     except ValueError:
         year = None
     try:
