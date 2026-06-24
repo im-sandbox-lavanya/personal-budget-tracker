@@ -138,7 +138,8 @@ def export_transactions():
     except ValueError:
         year = None
     try:
-        month = int(month_param) if month_param else None
+        month_int = int(month_param) if month_param else None
+        month = month_int if month_int is not None and 1 <= month_int <= 12 else None
     except ValueError:
         month = None
 
