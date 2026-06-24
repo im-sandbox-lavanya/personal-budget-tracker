@@ -1,6 +1,8 @@
+import csv
+import io
 from datetime import datetime
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, Response, flash, redirect, render_template, request, url_for
 
 from budget_app import models, services, storage
 
@@ -123,6 +125,50 @@ def delete_transaction(transaction_id):
     else:
         flash("Transaction not found.", "error")
     return redirect(request.referrer or url_for("transactions"))
+
+
+@app.route("/transactions/export")
+def export_transactions():
+    year_param = request.args.get("year")
+    month_param = request.args.get("month")
+    type_param = request.args.get("type", "")
+
+    year = int(year_param) if year_param else None
+    month = int(month_param) if month_param else None
+
+    data = storage.load_data()
+    all_txs = data["transactions"]
+    categories = data["categories"]
+
+    filtered = services.filter_transactions(all_txs, year=year, month=month, tx_type=type_param)
+    enriched = services.enrich_transactions(filtered, categories)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Date", "Description", "Category", "Type", "Amount"])
+    for tx in enriched:
+        writer.writerow([
+            tx["date"],
+            tx["description"],
+            tx["category_name"],
+            tx["type"],
+            f"{tx['amount']:.2f}",
+        ])
+
+    filename = "transactions"
+    if year and month:
+        filename += f"_{year}-{month:02d}"
+    elif year:
+        filename += f"_{year}"
+    if type_param in ("income", "expense"):
+        filename += f"_{type_param}"
+    filename += ".csv"
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 # ---------------------------------------------------------------------------
