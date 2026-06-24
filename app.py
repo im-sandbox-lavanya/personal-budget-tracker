@@ -124,9 +124,6 @@ def delete_transaction(transaction_id):
         flash("Transaction deleted.", "success")
     else:
         flash("Transaction not found.", "error")
-    referrer = request.referrer
-    if referrer and referrer.startswith(request.host_url):
-        return redirect(referrer)
     return redirect(url_for("transactions"))
 
 
