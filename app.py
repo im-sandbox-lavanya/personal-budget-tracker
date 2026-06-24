@@ -124,7 +124,10 @@ def delete_transaction(transaction_id):
         flash("Transaction deleted.", "success")
     else:
         flash("Transaction not found.", "error")
-    return redirect(request.referrer or url_for("transactions"))
+    referrer = request.referrer
+    if referrer and referrer.startswith(request.host_url):
+        return redirect(referrer)
+    return redirect(url_for("transactions"))
 
 
 @app.route("/transactions/export")
@@ -133,8 +136,14 @@ def export_transactions():
     month_param = request.args.get("month")
     type_param = request.args.get("type", "")
 
-    year = int(year_param) if year_param else None
-    month = int(month_param) if month_param else None
+    try:
+        year = int(year_param) if year_param else None
+    except ValueError:
+        year = None
+    try:
+        month = int(month_param) if month_param else None
+    except ValueError:
+        month = None
 
     data = storage.load_data()
     all_txs = data["transactions"]
@@ -167,7 +176,7 @@ def export_transactions():
     return Response(
         output.getvalue(),
         mimetype="text/csv",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
